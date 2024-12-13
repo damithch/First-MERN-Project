@@ -18,18 +18,11 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('MongoDB connected successfully'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
-// Define a Mongoose schema and model
-const dataSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  age: { type: Number, required: true },
-  createdAt: { type: Date, default: Date.now },
-});
+// Import the User model
+import User from './models/User.js';
 
-const Data = mongoose.model('Data', dataSchema);
-
-// POST route to send data to the database
-app.post('/send-data', async (req, res) => {
+// POST route to send user data to the database
+app.post('/users', async (req, res) => {
   try {
     const { name, email, age } = req.body;
 
@@ -38,16 +31,21 @@ app.post('/send-data', async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    // Create a new document
-    const newData = new Data({ name, email, age });
+    // Create a new user document
+    const newUser = new User({ name, email, age });
 
     // Save the document to the database
-    const savedData = await newData.save();
-    res.status(201).json({ success: true, data: savedData });
+    const savedUser = await newUser.save();
+    res.status(201).json({ success: true, data: savedUser });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Error saving data', error: error.message });
+    res.status(500).json({ success: false, message: 'Error saving user', error: error.message });
   }
+});
+
+// Default route for unmatched paths
+app.use((req, res) => {
+  res.status(404).send('Route not found');
 });
 
 // Start the server
