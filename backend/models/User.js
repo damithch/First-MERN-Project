@@ -1,4 +1,3 @@
-// backend/models/User.js
 import mongoose from 'mongoose';
 
 // Define the schema
