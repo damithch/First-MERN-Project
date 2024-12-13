@@ -1,62 +1,54 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
-// Initialize dotenv to load environment variables from .env
+// Load environment variables
 dotenv.config();
 
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Use middleware to parse incoming JSON requests
-app.use(express.json());
+// Middleware to parse incoming JSON requests
+app.use(bodyParser.json());
 
-// Simple test route
-app.get('/', (req, res) => {
-  res.send('Hello World from Express!');
-});
-
-// Define the User model
-const UserSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-});
-
-const User = mongoose.model('User', UserSchema);
-
-// GET route to fetch all users
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.find();  // Find all users in the database
-    res.status(200).json(users);  // Respond with all users in the database
-  } catch (err) {
-    res.status(400).json({ message: 'Error fetching users', error: err });
-  }
-});
-
-// POST route to create a new user
-app.post('/users', async (req, res) => {
-  const { name, email } = req.body;
-  try {
-    const newUser = new User({ name, email });
-    await newUser.save();  // Save the new user to the database
-    res.status(201).json(newUser);  // Respond with the newly created user
-  } catch (err) {
-    res.status(400).json({ message: 'Error creating user', error: err });
-  }
-});
-
-// Connect to MongoDB Atlas using the URI from the .env file
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('MongoDB connected successfully');
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-  });
+  .then(() => console.log('MongoDB connected successfully'))
+  .catch((err) => console.error('MongoDB connection error:', err));
+
+// Define a Mongoose schema and model
+const dataSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  age: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+const Data = mongoose.model('Data', dataSchema);
+
+// POST route to send data to the database
+app.post('/send-data', async (req, res) => {
+  try {
+    const { name, email, age } = req.body;
+
+    // Validate input
+    if (!name || !email || !age) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
+    }
+
+    // Create a new document
+    const newData = new Data({ name, email, age });
+
+    // Save the document to the database
+    const savedData = await newData.save();
+    res.status(201).json({ success: true, data: savedData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error saving data', error: error.message });
+  }
+});
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+app.listen(port, () => console.log(`Server running on port ${port}`));
