@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Import the User model
-import User from '.backend/models/User.js';
+import User from './models/User.js';
 
 // POST route to send user data to the database
 app.post('/users', async (req, res) => {
