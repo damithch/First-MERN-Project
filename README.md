@@ -24,5 +24,5 @@ Make sure to use **POSTMAN** to send requests to these endpoints and see how the
 Contributions are welcome! Please fork this repository and submit a pull request. To get started:
 ---
 
-Feel free to customize this further based on your project specifics! Happy coding! 😄
+Feel free to customize this further based on your project specifics! Happy coding!! 😄
 ```
